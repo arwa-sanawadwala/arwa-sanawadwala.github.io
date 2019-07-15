@@ -29,11 +29,12 @@ public class TransactionsService {
         PipelineOptions options = PipelineOptionsFactory.create();
         Pipeline p = Pipeline.create(options);
 
-        PCollection<KV<Integer,Integer>> transaction = new TransactionsService().getData(p, 100);
-        PCollectionView<Map<Integer,Integer>> position = new TransactionsService().getData(p, 1000)
+        DataGenerator dataGeneratorObj = new DataGenerator();
+        PCollection<KV<Integer,Integer>> transaction = dataGeneratorObj.getData(p, 100);
+        PCollectionView<Map<Integer,Integer>> position = dataGeneratorObj.getData(p, 1000)
                 .apply(View.asMap());
 
-        PCollectionView<Map<Integer,Integer>> dbData = new TransactionsService().getDbData(p).apply(View.asMap());
+        PCollectionView<Map<Integer,Integer>> dbData = dataGeneratorObj.getDbData(p).apply(View.asMap());
 
         PCollection<String> finalTransactionVal = transaction.apply("MatchTransactionalPositionDataDoFn", ParDo.of(new DoFn<KV<Integer, Integer>,
                 KV<Integer, KV<Integer, Integer>>>() {
@@ -47,9 +48,7 @@ public class TransactionsService {
                 Map<Integer, Integer> pos = c.sideInput(position);
                 if (pos.containsKey(e.getKey())) {
                     KV<Integer, KV<Integer, Integer>> mappedRecord = KV.of(e.getKey(), KV.of(e.getValue(), pos.get(e.getKey())));
-
-                    c.output(KV.of(e.getKey(), KV.of(e.getValue(), pos.get(e.getKey()))));
-//                c.output(e.getKey() +" : "+ KV.of(e.getValue(), pos.get(e.getKey())));
+                    c.output(mappedRecord);
                 } else
                     buffer.put(e.getKey(), e.getValue());
             }
@@ -78,39 +77,4 @@ public class TransactionsService {
         p.run();
 
     }
-
-    public PCollection<KV<Integer,Integer>> getData(Pipeline p, Integer amount){
-//        final List<Integer> elementsList = Arrays.asList(100, 1000);
-        return p.apply(GenerateSequence.from(0).withRate(1, Duration.standardSeconds(1)))
-                .apply(Window.into(FixedWindows.of(Duration.standardSeconds(5))))
-                .apply(MapElements.into(
-                        TypeDescriptors.kvs(TypeDescriptors.integers(),TypeDescriptors.integers()))
-                .via((Long x) ->  KV.of(90 + new Random().nextInt((100 - 98) + 1), amount)
-                ))
-        .apply(Distinct.create())
-                ;
-    }
-
-    static class splitDataFn extends DoFn<String, KV<Integer,Integer>> {
-
-        @ProcessElement
-        public void processElement(ProcessContext c) {
-            String row = c.element();
-            String[] x = row.split(",");
-            // Split the elements
-                c.output(KV.of(Integer.parseInt(x[0]), Integer.parseInt(x[1])));
-        }
-    }
-
-
-
-    public PCollection<KV<Integer, Integer>> getDbData(Pipeline p){
-        PCollection<String> data = p.apply(TextIO.read().from("src/main/resources/sample.csv"));
-        return data.apply(ParDo.of(new splitDataFn()));
-
-    }
-
-
-
-
 }

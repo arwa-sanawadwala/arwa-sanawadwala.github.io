@@ -32,7 +32,42 @@ public class ConvertMapToCsv {
         map.put("Balance", 1100);
         myArrList.add(map);
 
-        File file = new File("src/main/resources/sample.csv");
+        map = new HashMap<>();
+        map.put("AccountID", 93);
+        map.put("Balance", 1100);
+        myArrList.add(map);
+
+        map = new HashMap<>();
+        map.put("AccountID", 94);
+        map.put("Balance", 1100);
+        myArrList.add(map);
+
+        map = new HashMap<>();
+        map.put("AccountID", 95);
+        map.put("Balance", 1100);
+        myArrList.add(map);
+
+        map = new HashMap<>();
+        map.put("AccountID", 96);
+        map.put("Balance", 1100);
+        myArrList.add(map);
+
+        map = new HashMap<>();
+        map.put("AccountID", 97);
+        map.put("Balance", 1100);
+        myArrList.add(map);
+
+        map = new HashMap<>();
+        map.put("AccountID", 98);
+        map.put("Balance", 1100);
+        myArrList.add(map);
+
+        map = new HashMap<>();
+        map.put("AccountID", 99);
+        map.put("Balance", 1100);
+        myArrList.add(map);
+
+        File file = new File("src/main/resources/db_data.csv");
         Writer writer = new FileWriter(file, false);
         csvWriter(myArrList, writer);
     }

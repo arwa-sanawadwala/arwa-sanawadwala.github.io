@@ -1,22 +1,10 @@
-# Investigating using Apache Beam with Apache Kafka
+# Transaction service which will generate stream of data and use stateful processing
 
-* Start Kafka and Zookeeper
-    * `make up`
-* Create the Kafka topic
-    * `make topic`
-* Ensure it has been created
-    * `make describe`
-* Use Beam to write to topic
-    * `make producer`
-* Check messages in topic
-    * `make offset`
-* Dump messages from topic
-    * `make dump`
-* Consume messages and run wordcount with Beam
-    * `make consumer`
-* Check output
-    * `cat wordcount*`
-* Stop Kafka and Zookeeper
-    * `make down`
-* Clean up
-    * `make clean`
+* Entry point is TransactionService
+* TransactionService holds logic for:
+    * Generation of stream data.
+    * Read DB data from files.
+    * Process both the streams generated simultaneously and extract mapped records.
+    * Apply logic on mapped records along with db data read from files.
+    * Write final output in files which is sharded according to window.
+
